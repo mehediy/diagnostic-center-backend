@@ -27,6 +27,28 @@ async function run() {
     //   "Pinged your deployment. You successfully connected to MongoDB!"
     // );
     const userCollection = client.db("diagnosticDB").collection("users");
+
+    //
+    app.post("/api/v1/users", async (req, res) => {
+      const user = req.body;
+      const newUser = {
+        name: user.name,
+        email: user.email,
+        photoURL: user.photoURL,
+        bloodGroup: user.bloodGroup,
+        district: user.district,
+        upazilla: user.upazilla,
+        role: "user",
+        status: "active",
+      };
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "User already exists", insertedId: null });
+      }
+      const result = await userCollection.insertOne(newUser);
+      res.send(result);
+    });
   } finally {
   }
 }
