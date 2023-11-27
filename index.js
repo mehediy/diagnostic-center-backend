@@ -50,6 +50,12 @@ async function run() {
       res.send(result);
     });
 
+    // Get users
+    app.get("/api/v1/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
     // Check if user is admin
     app.get("/api/v1/users/admin/:email", async (req, res) => {
       const email = req.params.email;
