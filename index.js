@@ -57,10 +57,33 @@ async function run() {
       const result = await testCollection.insertOne(body);
       res.send(result);
     });
+    // Update test
+    app.put("/api/v1/tests/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updated = {
+        $set: {
+          ...body,
+        },
+      };
+      const result = await testCollection.updateOne(filter, updated, {
+        upsert: true,
+      });
+      res.send(result);
+    });
 
     // Get tests
     app.get("/api/v1/tests", async (req, res) => {
       const result = await testCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Get test
+    app.get("/api/v1/tests/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await testCollection.findOne(query);
       res.send(result);
     });
     // Delete test
