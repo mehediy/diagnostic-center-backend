@@ -63,6 +63,13 @@ async function run() {
       const result = await testCollection.find().toArray();
       res.send(result);
     });
+    // Delete test
+    app.delete("/api/v1/tests/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await testCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // Get users
     app.get("/api/v1/users", async (req, res) => {
