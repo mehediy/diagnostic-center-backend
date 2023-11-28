@@ -27,6 +27,7 @@ async function run() {
     //   "Pinged your deployment. You successfully connected to MongoDB!"
     // );
     const userCollection = client.db("diagnosticDB").collection("users");
+    const testCollection = client.db("diagnosticDB").collection("tests");
 
     //
     app.post("/api/v1/users", async (req, res) => {
@@ -47,6 +48,19 @@ async function run() {
         return res.send({ message: "User already exists", insertedId: null });
       }
       const result = await userCollection.insertOne(newUser);
+      res.send(result);
+    });
+
+    // Add a test
+    app.post("/api/v1/tests", async (req, res) => {
+      const body = req.body;
+      const result = await testCollection.insertOne(body);
+      res.send(result);
+    });
+
+    // Get tests
+    app.get("/api/v1/tests", async (req, res) => {
+      const result = await testCollection.find().toArray();
       res.send(result);
     });
 
