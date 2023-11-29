@@ -28,6 +28,7 @@ async function run() {
     // );
     const userCollection = client.db("diagnosticDB").collection("users");
     const testCollection = client.db("diagnosticDB").collection("tests");
+    const bookingCollection = client.db("diagnosticDB").collection("bookings");
 
     //
     app.post("/api/v1/users", async (req, res) => {
@@ -73,6 +74,51 @@ async function run() {
       res.send(result);
     });
 
+    // Book test
+    app.post("/api/v1/bookings", async (req, res) => {
+      const body = req.body;
+
+      const existingBooking = await bookingCollection.findOne({
+        booking_id: body.booking_id,
+        email: body.email,
+      });
+
+      if (existingBooking) {
+        // If an existing booking is found, return an error response
+        res.status(400).send({
+          success: false,
+          message: "You have already booked",
+        });
+      } else {
+        // decrement the "slots" count
+
+        const result = await testCollection.findOneAndUpdate(
+          {
+            _id: new ObjectId(body.booking_id),
+            slots: { $gte: 1 }, // Check if slots is greater than or equal to 1
+          },
+          { $inc: { slots: -1 } },
+          { returnDocument: "after" } // Ensure the updated document is returned
+        );
+
+        if (result) {
+          // Insert the booking
+          const bookingResult = await bookingCollection.insertOne(body);
+          res.send(bookingResult);
+        } else {
+          res.status(500).send({
+            success: false,
+            message: "Failed to update slots",
+          });
+        }
+      }
+    });
+
+    // Get bookings
+    app.get("/api/v1/bookings", async (req, res) => {
+      const result = await bookingCollection.find().toArray();
+      res.send(result);
+    });
     // Get tests
     app.get("/api/v1/tests", async (req, res) => {
       const result = await testCollection.find().toArray();
