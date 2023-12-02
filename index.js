@@ -128,6 +128,22 @@ async function run() {
       res.send(result);
     });
 
+    // Get tests featured
+    app.get("/api/v1/featured-tests", async (req, res) => {
+      const currentDate = new Date();
+      const result = await testCollection
+        .find({
+          date: {
+            $gte: currentDate.toISOString(),
+          },
+        })
+        .sort({ slots: -1 })
+        .limit(3)
+        .toArray();
+
+      res.send(result);
+    });
+
     // Get test
     app.get("/api/v1/tests/:id", async (req, res) => {
       const id = req.params.id;
