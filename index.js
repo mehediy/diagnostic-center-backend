@@ -103,7 +103,10 @@ async function run() {
 
         if (result) {
           // Insert the booking
-          const bookingResult = await bookingCollection.insertOne(body);
+          const bookingResult = await bookingCollection.insertOne({
+            ...body,
+            status: "pending",
+          });
           res.send(bookingResult);
         } else {
           res.status(500).send({
