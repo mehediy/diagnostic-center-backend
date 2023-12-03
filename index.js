@@ -127,7 +127,7 @@ async function run() {
     app.get("/api/v1/bookings/:email", async (req, res) => {
       const email = req.params.email;
       const upcoming = req.query.sort;
-      let query = {};
+      let query = { status: { $ne: "delivered" } };
       if (upcoming) {
         query.date = {
           $gte: new Date().toISOString(),
@@ -159,8 +159,10 @@ async function run() {
           title: 1,
           status: 1,
           report: 1,
+          date: 1,
           reporting_date: 1,
         })
+        .sort({ _id: -1 })
         .toArray();
       res.send(result);
     });
@@ -199,7 +201,7 @@ async function run() {
     // Get tests
     app.get("/api/v1/test-result/:email", async (req, res) => {
       const email = req.params.email;
-      const query = { email: email };
+      const query = { email: email, status: { $ne: "pending" } };
       const result = await bookingCollection
         .find(query)
         .sort({ reporting_date: -1 })
