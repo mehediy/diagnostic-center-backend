@@ -122,6 +122,25 @@ async function run() {
       const result = await bookingCollection.find().toArray();
       res.send(result);
     });
+
+    // Get bookings by email
+    app.get("/api/v1/bookings/:email", async (req, res) => {
+      const email = req.params.email;
+      const upcoming = req.query.sort;
+      let query = {};
+      if (upcoming) {
+        query.date = {
+          $gte: new Date().toISOString(),
+        };
+      }
+      const filter = { email: email };
+      const result = await bookingCollection
+        .find({ ...filter, ...query })
+        .sort({ date: 1 })
+        .toArray();
+      res.send(result);
+    });
+
     // Get tests
     app.get("/api/v1/tests", async (req, res) => {
       const upcoming = req.query.sort;
