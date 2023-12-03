@@ -124,7 +124,17 @@ async function run() {
     });
     // Get tests
     app.get("/api/v1/tests", async (req, res) => {
-      const result = await testCollection.find().toArray();
+      const upcoming = req.query.sort;
+      let query = {};
+      if (upcoming) {
+        query.date = {
+          $gte: new Date().toISOString(),
+        };
+      }
+      const result = await testCollection
+        .find(query)
+        .sort({ date: 1 })
+        .toArray();
       res.send(result);
     });
 
@@ -137,7 +147,7 @@ async function run() {
             $gte: currentDate.toISOString(),
           },
         })
-        .sort({ slots: -1 })
+        .sort({ slots: 1 })
         .limit(3)
         .toArray();
 
