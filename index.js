@@ -141,6 +141,21 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/api/v1/bookings/:email/:id", async (req, res) => {
+      const id = req.params.id;
+      const email = req.params.email;
+
+      const filter = { _id: new ObjectId(id), email: email };
+      const body = req.body;
+      const updatedDoc = {
+        $set: {
+          status: body.status,
+        },
+      };
+      const result = await bookingCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
     // Get tests
     app.get("/api/v1/tests", async (req, res) => {
       const upcoming = req.query.sort;
