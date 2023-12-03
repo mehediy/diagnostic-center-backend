@@ -141,6 +141,46 @@ async function run() {
       res.send(result);
     });
 
+    // Get reservations
+    app.get("/api/v1/reservations", async (req, res) => {
+      const searchQuery = req.query.q;
+      let query = {};
+      if (searchQuery) {
+        query.$or = [
+          { title: { $regex: searchQuery, $options: "i" } },
+          { email: { $regex: searchQuery, $options: "i" } },
+        ];
+      }
+      const result = await bookingCollection
+        .find(query)
+        .project({
+          booking_id: 1,
+          email: 1,
+          title: 1,
+          status: 1,
+          report: 1,
+          reporting_date: 1,
+        })
+        .toArray();
+      res.send(result);
+    });
+    // update reservations
+    app.put("/api/v1/reservations/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updated = {
+        $set: {
+          ...body,
+        },
+      };
+      const result = await bookingCollection.updateOne(filter, updated, {
+        upsert: true,
+      });
+      res.send(result);
+    });
+
+    // update booking status
     app.patch("/api/v1/bookings/:email/:id", async (req, res) => {
       const id = req.params.id;
       const email = req.params.email;
@@ -153,6 +193,17 @@ async function run() {
         },
       };
       const result = await bookingCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    // Get tests
+    app.get("/api/v1/test-result/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await bookingCollection
+        .find(query)
+        .sort({ reporting_date: -1 })
+        .toArray();
       res.send(result);
     });
 
