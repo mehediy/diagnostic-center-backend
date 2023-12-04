@@ -274,6 +274,18 @@ async function run() {
       res.send({ admin });
     });
 
+    // Check if user is blocked
+    app.get("/api/v1/users/blocked/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let blocked = false;
+      if (user) {
+        blocked = user?.status === "block";
+      }
+      res.send({ blocked });
+    });
+
     // Update user role
     app.patch("/api/v1/users/admin/:id", async (req, res) => {
       const id = req.params.id;
